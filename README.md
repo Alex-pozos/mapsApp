@@ -1,4 +1,22 @@
 # MapsApp
+# Pasos para poder subir tu ApiKey en MapsApp
+
+No usar directamente en AngularCLI (a menos que estén creadas las variballe de entorno), ya que las variable de entorno se crean en el .env
+
+## Pasos 
+1. Instalar 'dotenv' desde npm:
+  - npm install dotenv --save-dev
+2. Crear el archivo .env y clonar el archivo .env.template
+3. Llenar las variables de entorno a lo que pide en cada una de ellas
+4. Crear en package.json 'envs'
+  - "envs": "node ./scripts/set-envs.js"
+5. Ejecutar el comando una ves llenado todo para que se creé el archivo en automatico
+6. Para development ejecutar:
+  - npm run start
+7. Para production ejecutar:
+  - npm run build
+
+
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.5.
 
