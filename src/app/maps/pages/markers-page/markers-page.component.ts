@@ -1,14 +1,28 @@
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Map, LngLat, Marker } from 'mapbox-gl'
 
+
+interface MarkersAndColor {
+  color: string;
+  marker: Marker;
+};
+
+interface PlainMarker {
+  color: string;
+  lngLat: number[];
+}
+
 @Component({
   templateUrl: './markers-page.component.html',
   styleUrls: ['./markers-page.component.css']
 })
+
 export class MarkersPageComponent implements AfterViewInit {
 
 
   @ViewChild('map') divMap?: ElementRef;
+
+  public markers: MarkersAndColor[] = [];
 
   public map?: Map;
   public currentLngLat: LngLat = new LngLat(-99.13338163717722, 19.43262959512556);
@@ -28,6 +42,8 @@ export class MarkersPageComponent implements AfterViewInit {
     });
     // const marker = new Marker().setLngLat(this.currentLngLat).addTo(this.map);
 
+    this.readFromLocalStorage();
+
   }
 
   createMarker() {
@@ -38,20 +54,67 @@ export class MarkersPageComponent implements AfterViewInit {
     const color = '#xxxxxx'.replace(/x/g, y => (Math.random() * 16 | 0).toString(16));
     const lngLat = this.map.getCenter();
 
-    this.addMaerker(lngLat, color);
+    this.addMarker(lngLat, color);
   }
 
-  addMaerker(lngLat: LngLat, color: string) {
+  addMarker(lngLat: LngLat, color: string) {
     if (!this.map) {
       return;
     }
 
-    const marker =new Marker({
+    const marker = new Marker({
       color: color,
       draggable: true
     })
-    .setLngLat(lngLat)
-    .addTo(this.map);
+      .setLngLat(lngLat)
+      .addTo(this.map);
+
+    this.markers.push({ color, marker });
+    this.saveToLocalStorage();
+
+    marker.on('dragend', () => {
+      this.saveToLocalStorage();
+    });
+
+  }
+
+  deleteMarker(index: number) {
+      this.markers[index].marker.remove();
+      this.markers.splice(index, 1);
+      
+  }
+
+  flyTo(marker: Marker) {
+    this.map?.flyTo({
+      zoom: 16,
+      center: marker.getLngLat(),
+      //       duration: 3000, // Animate over 12 seconds
+      // essential: true 
+    })
+  }
+
+  saveToLocalStorage() {
+    const plainMarkers: PlainMarker[] = this.markers.map(({ color, marker }) => {
+      return {
+        color,
+        lngLat: marker.getLngLat().toArray()
+      }
+    });
+
+    localStorage.setItem('plainMarkers', JSON.stringify(plainMarkers));
+
+  }
+
+  readFromLocalStorage() {
+    const plainMarkersString = localStorage.getItem('plainMarkers') ?? '[]';
+    const plainMarkers: PlainMarker[] = JSON.parse(plainMarkersString);
+
+    plainMarkers.forEach(({ color, lngLat }) => {
+      const [lng, lat] = lngLat;
+      const coords = new LngLat(lng, lat);
+
+      this.addMarker(coords, color);
+    })
   }
 
 }

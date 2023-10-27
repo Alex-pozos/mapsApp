@@ -2,7 +2,7 @@
 
 # Archivos no incluidos a la hora de subir en Github
 .env
-src/environments/environments.ts
+src/environments/environment.ts
 
 # Compiled output
 /dist
